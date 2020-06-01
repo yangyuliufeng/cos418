@@ -1,6 +1,9 @@
 package mapreduce
 
-import "time"
+import (
+	"time"
+	"fmt"
+)
 
 // As tasks become available, schedule() decides how to assign those tasks to workers, and how to handle worker failures.
 // schedule() starts and waits for all tasks in the given phase (Map or Reduce).
@@ -19,20 +22,22 @@ func (mr *Master) schedule(phase jobPhase) {
 	debug("Schedule: %v %v tasks (%d I/Os)\n", ntasks, phase, nios)
 
 	stats := make([]bool, ntasks)
-	current_worker := 0
+	currentWorker := 0
 
 	for {
 		count := ntasks
 		for i := 0; i < ntasks; i++ {
 			if !stats[i] {
 				mr.Lock()
-				num_workers := len(mr.workers)
-				if num_workers == 0 {
+				numWorkers := len(mr.workers)
+				fmt.Println(numWorkers)
+				if numWorkers==0 {
 					mr.Unlock()
+					time.Sleep(time.Second)
 					continue
 				}
-				current_worker = (current_worker + 1) % num_workers
-				Worker := mr.workers[current_worker]
+				currentWorker = (currentWorker + 1) % numWorkers
+				Worker := mr.workers[currentWorker]
 				mr.Unlock()
 				var file string
 				if phase == mapPhase {
